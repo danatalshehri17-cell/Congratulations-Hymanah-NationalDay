@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بطاقات التهنئة باليوم الوطني</title>
+    <link rel="icon" href="2.png" type="image/png">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f5132 0%, #198754 50%, #20c997 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .header {
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #0f5132;
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+        .header p {
+            color: #666;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        .input-section {
+            margin: 30px 0;
+        }
+        #name {
+            padding: 20px;
+            font-size: 1.3rem;
+            width: 100%;
+            max-width: 400px;
+            border: 3px solid #0f5132;
+            border-radius: 50px;
+            text-align: center;
+            font-weight: 600;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        #name:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 5px rgba(15, 81, 50, 0.2);
+        }
+        .generate-btn {
+            background: linear-gradient(135deg, #0f5132, #198754);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(15, 81, 50, 0.3);
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(15, 81, 50, 0.4);
+        }
+        .canvas-container {
+            margin: 40px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        #canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(23, 162, 184, 0.4);
+        }
+        .success-msg {
+            background: linear-gradient(135deg, #d1eddb, #c3e6cb);
+            color: #155724;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-weight: 600;
+            border: 2px solid #c3e6cb;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .header h1 { font-size: 2rem; }
+            #name { width: 90%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇸🇦 بطاقات التهنئة باليوم الوطني 🇸🇦</h1>
+            <p style="color: #0f5132; font-weight: 600; font-size: 1.1rem; margin: 10px 0;">مقدمة لكم من هيمنة</p>
+            <p>اكتب أي اسم على بطاقة التهنئة الجميلة</p>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" id="name" placeholder="اكتب الاسم هنا...">
+            <br>
+            <button class="generate-btn" onclick="writeOnCard()">✨ اكتب الاسم على البطاقة ✨</button>
+        </div>
+        
+        <div class="canvas-container" id="canvasContainer" style="display: none;">
+            <canvas id="canvas"></canvas>
+            <div>
+                <button class="download-btn" onclick="download()">📥 تحميل البطاقة</button>
+                <button class="download-btn" onclick="saveToGallery()">📱 حفظ في الصور</button>
+                <button class="download-btn" onclick="shareCard()">📤 مشاركة</button>
+                <button class="download-btn" onclick="newName()">✏️ اسم جديد</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let img = new Image();
+
+        // تحميل البطاقة تلقائياً
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            console.log('تم تحميل البطاقة بنجاح!');
+        }
+        
+        img.onerror = function() {
+            alert('لم يتم العثور على card.png - تأكد من وجود الملف');
+            console.log('خطأ في تحميل الصورة');
+        }
+        
+        img.src = 'card.png'; // تحميل البطاقة الأصلية
+
+        function writeOnCard() {
+            let name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('اكتب اسمك أولاً!');
+                return;
+            }
+
+            // التأكد من تحميل الصورة
+            if (!img.complete || img.naturalWidth === 0) {
+                alert('انتظر قليلاً حتى يتم تحميل البطاقة، ثم جرب مرة أخرى');
+                return;
+            }
+
+            console.log('بدء كتابة الاسم:', name);
+            
+            // رسم الصورة الأصلية
+            ctx.drawImage(img, 0, 0);
+            console.log('تم رسم الصورة');
+
+            // كتابة الاسم
+            ctx.textAlign = 'center';
+            let fontSize = Math.min(canvas.width, canvas.height) * 0.08;
+            ctx.font = `bold ${fontSize}px Arial`;
+            
+            let x = canvas.width / 2;
+            let y = canvas.height * 0.42;
+            
+            // كتابة الاسم مباشرة على الصورة
+            ctx.fillStyle = '#0f5132'; // أخضر
+            ctx.strokeStyle = 'white'; // حدود بيضاء للوضوح
+            ctx.lineWidth = 3;
+            
+            ctx.strokeText(name, x, y); // حدود بيضاء
+            ctx.fillText(name, x, y);   // النص الأخضر
+            
+            // إظهار البطاقة مع رسالة نجاح
+            document.getElementById('canvasContainer').style.display = 'block';
+            
+            // إضافة رسالة نجاح
+            let successMsg = document.createElement('div');
+            successMsg.className = 'success-msg';
+            successMsg.innerHTML = `🎉 تم إنشاء بطاقة التهنئة باسم "${name}" بنجاح! 🎉`;
+            
+            let container = document.getElementById('canvasContainer');
+            if (!container.querySelector('.success-msg')) {
+                container.insertBefore(successMsg, container.firstChild);
+            }
+        }
+
+        function download() {
+            let name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('يرجى كتابة اسم أولاً!');
+                return;
+            }
+            
+            // التأكد من وجود البطاقة
+            if (canvas.width === 0 || canvas.height === 0) {
+                alert('يرجى إنشاء البطاقة أولاً!');
+                return;
+            }
+            
+            // استخدام toBlob بدلاً من toDataURL
+            canvas.toBlob(function(blob) {
+                if (blob) {
+                    // إنشاء URL للـ blob
+                    let url = URL.createObjectURL(blob);
+                    
+                    // إنشاء رابط التحميل
+                    let link = document.createElement('a');
+                    link.href = url;
+                    link.download = `بطاقة_تهنئة_${name}.png`;
+                    
+                    // تفعيل التحميل
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // تنظيف الـ URL
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    alert('تم تحميل البطاقة بنجاح! 📥');
+                } else {
+                    // إذا فشل toBlob، استخدم الطريقة القديمة
+                    try {
+                        let link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = `بطاقة_تهنئة_${name}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        alert('تم تحميل البطاقة! 📥');
+                    } catch (e) {
+                        alert('عذراً، المتصفح لا يدعم التحميل المباشر. اضغط كليك يمين على البطاقة واختر "حفظ الصورة"');
+                    }
+                }
+            }, 'image/png', 1.0);
+        }
+        
+        function openInNewTab() {
+            let name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('يرجى كتابة اسم أولاً!');
+                return;
+            }
+            
+            // حل بسيط: تحويل Canvas إلى صورة وعرضها
+            try {
+                let dataURL = canvas.toDataURL('image/png', 1.0);
+                
+                // إنشاء عنصر صورة جديد
+                let img = document.createElement('img');
+                img.src = dataURL;
+                img.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    max-width: 90vw;
+                    max-height: 90vh;
+                    z-index: 10000;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    cursor: pointer;
+                `;
+                
+                // إنشاء خلفية
+                let overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.8);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                `;
+                
+                // رسالة
+                let message = document.createElement('div');
+                message.style.cssText = `
+                    color: white;
+                    font-size: 1.2rem;
+                    margin-bottom: 20px;
+                    text-align: center;
+                `;
+                message.innerHTML = `
+                    <h3>بطاقة تهنئة - ${name}</h3>
+                    <p>اضغط كليك يمين على الصورة واختر "حفظ الصورة"</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8;">اضغط في أي مكان للإغلاق</p>
+                `;
+                
+                overlay.appendChild(message);
+                overlay.appendChild(img);
+                
+                // إغلاق عند النقر
+                overlay.addEventListener('click', function() {
+                    document.body.removeChild(overlay);
+                });
+                
+                // إضافة للصفحة
+                document.body.appendChild(overlay);
+                
+            } catch (error) {
+                alert('حدث خطأ. جرب الضغط كليك يمين على البطاقة واختر "حفظ الصورة"');
+            }
+        }
+
+        // حفظ في الصور (للجوال خاصة)
+        function saveToGallery() {
+            let name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('يرجى كتابة اسم أولاً!');
+                return;
+            }
+            
+            // تحويل Canvas إلى Blob
+            canvas.toBlob(function(blob) {
+                if (blob) {
+                    // للجوال: استخدام Web Share API مع الملف
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'temp.png', { type: 'image/png' })] })) {
+                        const file = new File([blob], `بطاقة_تهنئة_${name}.png`, { type: 'image/png' });
+                        navigator.share({
+                            title: 'بطاقة تهنئة باليوم الوطني',
+                            text: `بطاقة تهنئة باسم ${name}`,
+                            files: [file]
+                        }).then(() => {
+                            alert('تم! يمكنك الآن حفظ الصورة في معرض الصور 📱');
+                        }).catch(() => {
+                            // إذا فشل، استخدم الطريقة العادية
+                            fallbackSave(blob, name);
+                        });
+                    } else {
+                        // للكمبيوتر أو الجوالات القديمة
+                        fallbackSave(blob, name);
+                    }
+                } else {
+                    alert('حدث خطأ في إنشاء الصورة');
+                }
+            }, 'image/png', 1.0);
+        }
+        
+        // طريقة احتياطية للحفظ
+        function fallbackSave(blob, name) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `بطاقة_تهنئة_${name}.png`;
+            
+            // للجوال: فتح في نافذة جديدة
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                // إنشاء صفحة خاصة للجوال
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                    newWindow.document.write(`
+                        <html>
+                        <head>
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>حفظ البطاقة</title>
+                        </head>
+                        <body style="margin:0; padding:20px; text-align:center; background:#f5f5f5; font-family:Arial;">
+                            <h2>بطاقة تهنئة - ${name}</h2>
+                            <img src="${url}" style="max-width:100%; border-radius:10px; margin:20px 0;">
+                            <div style="background:#e3f2fd; padding:15px; border-radius:10px; margin:20px 0;">
+                                <p style="margin:0; color:#1565c0; font-weight:600;">📱 للحفظ في معرض الصور:</p>
+                                <p style="margin:5px 0; color:#666;">اضغط مطولاً على الصورة ← اختر "حفظ في الصور"</p>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    newWindow.document.close();
+                } else {
+                    alert('اضغط مطولاً على البطاقة واختر "حفظ الصورة" 📱');
+                }
+            } else {
+                // للكمبيوتر: تحميل مباشر
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert('تم تحميل البطاقة! 📥');
+            }
+            
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        
+        // مشاركة البطاقة
+        function shareCard() {
+            let name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('يرجى كتابة اسم أولاً!');
+                return;
+            }
+            
+            canvas.toBlob(function(blob) {
+                if (blob && navigator.share) {
+                    const file = new File([blob], `بطاقة_تهنئة_${name}.png`, { type: 'image/png' });
+                    navigator.share({
+                        title: 'بطاقة تهنئة باليوم الوطني',
+                        text: `بطاقة تهنئة مخصصة باسم ${name} بمناسبة اليوم الوطني السعودي 🇸🇦`,
+                        files: [file]
+                    }).catch(() => {
+                        // إذا فشل، افتح خيارات المشاركة
+                        showShareOptions(name);
+                    });
+                } else {
+                    // للمتصفحات التي لا تدعم Web Share
+                    showShareOptions(name);
+                }
+            }, 'image/png', 1.0);
+        }
+        
+        // عرض خيارات المشاركة
+        function showShareOptions(name) {
+            const shareText = `بطاقة تهنئة مخصصة باسم ${name} بمناسبة اليوم الوطني السعودي 🇸🇦`;
+            const shareUrl = window.location.href;
+            
+            const options = [
+                { name: 'واتساب', url: `https://wa.me/?text=${encodeURIComponent(shareText)}`, icon: '💬' },
+                { name: 'تويتر', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, icon: '🐦' },
+                { name: 'فيسبوك', url: `https://www.facebook.com/sharer.php?u=${encodeURIComponent(shareUrl)}`, icon: '📘' }
+            ];
+            
+            let optionsHtml = options.map(opt => 
+                `<a href="${opt.url}" target="_blank" style="display:block; padding:15px; margin:10px 0; background:${getColorForPlatform(opt.name)}; color:white; text-decoration:none; border-radius:10px; font-weight:600;">
+                    ${opt.icon} مشاركة عبر ${opt.name}
+                </a>`
+            ).join('');
+            
+            // عرض خيارات المشاركة
+            let overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); z-index: 10000; 
+                display: flex; align-items: center; justify-content: center;
+            `;
+            overlay.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center;">
+                    <h3 style="color: #0f5132; margin-bottom: 20px;">📤 مشاركة البطاقة</h3>
+                    ${optionsHtml}
+                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 20px; padding: 10px 20px; background: #666; color: white; border: none; border-radius: 10px; cursor: pointer;">إغلاق</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        
+        function getColorForPlatform(platform) {
+            const colors = {
+                'واتساب': '#25D366',
+                'تويتر': '#1DA1F2', 
+                'فيسبوك': '#4267B2'
+            };
+            return colors[platform] || '#666';
+        }
+
+        function newName() {
+            document.getElementById('name').value = '';
+            document.getElementById('name').focus();
+            document.getElementById('canvasContainer').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

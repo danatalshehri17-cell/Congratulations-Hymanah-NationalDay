@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بطاقة التهنئة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f5132, #198754);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #0f5132;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 3px dashed #0f5132;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+        .name-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #0f5132;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            background: linear-gradient(135deg, #0f5132, #198754);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        #result {
+            margin-top: 30px;
+            text-align: center;
+        }
+        canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇸🇦 بطاقة التهنئة باليوم الوطني 🇸🇦</h1>
+        
+        <div class="upload-area">
+            <p style="font-size: 3rem; margin: 0;">📷</p>
+            <h3>ارفع صورة البطاقة</h3>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <label for="imageInput" class="btn">📁 اختر الصورة</label>
+            <p id="uploadStatus"></p>
+        </div>
+
+        <input type="text" id="nameInput" class="name-input" placeholder="اكتب الاسم هنا..." disabled>
+        <div style="text-align: center;">
+            <button id="generateBtn" class="btn" disabled>اكتب الاسم على البطاقة</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+
+        const imageInput = document.getElementById('imageInput');
+        const nameInput = document.getElementById('nameInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const result = document.getElementById('result');
+
+        // Handle image upload
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        uploadedImage = img;
+                        uploadStatus.innerHTML = '✅ تم تحميل الصورة بنجاح!';
+                        uploadStatus.style.color = '#155724';
+                        nameInput.disabled = false;
+                        nameInput.focus();
+                        updateButton();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle name input
+        nameInput.addEventListener('input', updateButton);
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !generateBtn.disabled) {
+                generateCard();
+            }
+        });
+
+        // Update button state
+        function updateButton() {
+            const name = nameInput.value.trim();
+            if (uploadedImage && name) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = `اكتب "${name}" على البطاقة`;
+            } else {
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'اكتب الاسم على البطاقة';
+            }
+        }
+
+        // Generate card
+        generateBtn.addEventListener('click', generateCard);
+
+        function generateCard() {
+            const name = nameInput.value.trim();
+            if (!uploadedImage || !name) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size
+            canvas.width = uploadedImage.width;
+            canvas.height = uploadedImage.height;
+
+            // Draw original image
+            ctx.drawImage(uploadedImage, 0, 0);
+
+            // Add name
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const fontSize = Math.min(canvas.width, canvas.height) * 0.08;
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+
+            const x = canvas.width * 0.5;
+            const y = canvas.height * 0.7;
+
+            // Background
+            const textWidth = ctx.measureText(name).width;
+            const padding = 25;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillRect(x - textWidth/2 - padding, y - fontSize/2 - 10, textWidth + padding*2, fontSize + 20);
+            
+            ctx.strokeStyle = '#0f5132';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x - textWidth/2 - padding, y - fontSize/2 - 10, textWidth + padding*2, fontSize + 20);
+
+            // Text
+            ctx.fillStyle = '#0f5132';
+            ctx.fillText(name, x, y);
+
+            // Show result
+            result.innerHTML = `
+                <h3>🎉 البطاقة جاهزة! 🎉</h3>
+                <div style="margin: 20px 0;">
+                    ${canvas.outerHTML}
+                </div>
+                <button onclick="downloadImage()" class="btn">📥 تحميل البطاقة</button>
+                <button onclick="printImage()" class="btn">🖨️ طباعة</button>
+                <button onclick="newName()" class="btn">✏️ اسم جديد</button>
+            `;
+
+            window.currentCanvas = canvas;
+        }
+
+        // Download image
+        function downloadImage() {
+            if (window.currentCanvas) {
+                const link = document.createElement('a');
+                link.download = `بطاقة_${nameInput.value.trim()}.png`;
+                link.href = window.currentCanvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        // Print image
+        function printImage() {
+            if (window.currentCanvas) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                    <body style="margin:0;text-align:center;">
+                        <img src="${window.currentCanvas.toDataURL()}" style="max-width:100%;">
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.onload = () => printWindow.print();
+            }
+        }
+
+        // New name
+        function newName() {
+            nameInput.value = '';
+            nameInput.focus();
+            updateButton();
+            result.innerHTML = '';
+        }
+    </script>
+</body>
+</html>
+

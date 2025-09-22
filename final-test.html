@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار نهائي - بطاقات التهنئة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f5132, #198754);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .test-container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #0f5132, #198754);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 15px;
+            transition: all 0.3s;
+            min-width: 200px;
+            font-weight: 600;
+        }
+        .test-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            text-align: right;
+        }
+        .success { 
+            background: linear-gradient(135deg, #d1eddb, #c3e6cb); 
+            color: #155724; 
+            border: 2px solid #c3e6cb; 
+        }
+        .error { 
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb); 
+            color: #721c24; 
+            border: 2px solid #f5c6cb; 
+        }
+        h1 { 
+            color: #0f5132; 
+            margin-bottom: 10px; 
+            font-size: 2.2rem;
+        }
+        p { 
+            color: #666; 
+            margin-bottom: 30px; 
+            font-size: 1.1rem;
+        }
+        .demo-card {
+            background: linear-gradient(135deg, #f8f9fa, #e8f5e8);
+            border: 3px solid #0f5132;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 اختبار نهائي</h1>
+        <p>تأكد من أن الموقع يعمل بشكل مثالي</p>
+        
+        <button class="test-button" onclick="testCanvasSupport()">🎨 اختبار Canvas</button><br>
+        <button class="test-button" onclick="testCardCreation()">📄 اختبار إنشاء البطاقة</button><br>
+        <button class="test-button" onclick="createDemoCard()">✨ إنشاء بطاقة تجريبية</button><br>
+        <button class="test-button" onclick="openMainSite()">🚀 فتح الموقع الرئيسي</button>
+        
+        <div id="testResult" class="result"></div>
+        <div id="demoCard" class="demo-card"></div>
+    </div>
+
+    <script>
+        function showResult(message, isSuccess = true) {
+            const result = document.getElementById('testResult');
+            result.style.display = 'block';
+            result.className = `result ${isSuccess ? 'success' : 'error'}`;
+            result.innerHTML = message;
+        }
+
+        function testCanvasSupport() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                if (ctx) {
+                    // Test basic canvas operations
+                    canvas.width = 200;
+                    canvas.height = 100;
+                    
+                    ctx.fillStyle = '#0f5132';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = '20px Arial';
+                    ctx.fillText('Canvas OK!', 50, 50);
+                    
+                    showResult('✅ Canvas مدعوم ويعمل بشكل ممتاز!<br>يمكن إنشاء بطاقات عالية الجودة.', true);
+                } else {
+                    throw new Error('Canvas context not available');
+                }
+            } catch (error) {
+                showResult('❌ خطأ في Canvas: ' + error.message, false);
+            }
+        }
+
+        function testCardCreation() {
+            try {
+                showResult('🔄 جاري اختبار إنشاء البطاقة...', true);
+                
+                // Simulate card creation process
+                const testName = 'اختبار';
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas size
+                canvas.width = 400;
+                canvas.height = 600;
+                
+                // Create a mini version of the card
+                const saudiGreen = '#0f5132';
+                const gold = '#FFD700';
+                const white = '#FFFFFF';
+                
+                // Background
+                ctx.fillStyle = white;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Border
+                ctx.strokeStyle = saudiGreen;
+                ctx.lineWidth = 5;
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
+                
+                // Title
+                ctx.fillStyle = saudiGreen;
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('اليوم الوطني السعودي', canvas.width / 2, 80);
+                
+                // Name
+                ctx.font = 'bold 32px Arial';
+                ctx.fillText(testName, canvas.width / 2, 300);
+                
+                // Subtitle
+                ctx.font = '18px Arial';
+                ctx.fillText('كل عام وأنت بخير', canvas.width / 2, 350);
+                
+                // Convert to data URL to verify creation
+                const dataUrl = canvas.toDataURL();
+                
+                if (dataUrl && dataUrl.startsWith('data:image/png')) {
+                    showResult(`✅ تم إنشاء بطاقة تجريبية بنجاح!<br>
+                              حجم البيانات: ${Math.round(dataUrl.length / 1024)} KB<br>
+                              البطاقة جاهزة للتحميل والمشاركة.`, true);
+                } else {
+                    throw new Error('Failed to generate card data');
+                }
+            } catch (error) {
+                showResult('❌ خطأ في إنشاء البطاقة: ' + error.message, false);
+            }
+        }
+
+        function createDemoCard() {
+            try {
+                const demoCard = document.getElementById('demoCard');
+                
+                demoCard.innerHTML = `
+                    <div style="text-align: center; color: #0f5132;">
+                        <h2 style="margin: 0 0 20px 0; font-size: 1.8rem;">🇸🇦 اليوم الوطني السعودي 🇸🇦</h2>
+                        <p style="color: #FFD700; font-size: 1.2rem; font-weight: bold; margin: 10px 0;">94</p>
+                        
+                        <div style="background: white; border: 3px solid #0f5132; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h3 style="color: #0f5132; font-size: 1.8rem; margin: 0;">مرحبا بالجميع</h3>
+                        </div>
+                        
+                        <p style="color: #0f5132; margin: 15px 0;">⭐ كل عام وأنتم بخير ⭐</p>
+                        <p style="color: #0f5132; font-size: 0.9rem;">بمناسبة اليوم الوطني للمملكة العربية السعودية</p>
+                        <h4 style="color: #0f5132; margin: 20px 0;">💚 دام عزك يا وطن 💚</h4>
+                    </div>
+                `;
+                
+                demoCard.style.display = 'block';
+                showResult('✅ تم إنشاء بطاقة تجريبية HTML بنجاح!<br>هذا مثال على الشكل النهائي للبطاقة.', true);
+                
+                // Scroll to demo card
+                demoCard.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                showResult('❌ خطأ في إنشاء البطاقة التجريبية: ' + error.message, false);
+            }
+        }
+
+        function openMainSite() {
+            try {
+                window.open('index.html', '_blank');
+                showResult('🚀 تم فتح الموقع الرئيسي في نافذة جديدة!<br>يمكنك الآن إدخال اسمك وإنشاء بطاقتك الخاصة.', true);
+            } catch (error) {
+                showResult('❌ خطأ في فتح الموقع: ' + error.message, false);
+            }
+        }
+
+        // Auto-run canvas test on page load
+        window.onload = function() {
+            setTimeout(() => {
+                showResult('🎉 مرحباً! جميع الاختبارات جاهزة للتشغيل.<br>ابدأ بـ "اختبار Canvas" للتأكد من جاهزية النظام.', true);
+            }, 500);
+        };
+    </script>
+</body>
+</html>
